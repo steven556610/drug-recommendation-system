@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioRec | Network Proximity & GNN Recommendation Suite</title>
+    
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js for Scientific Curves -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="glow-container">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <div class="app-layout">
+        <!-- Sidebar / Navigation -->
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="logo-icon"><i data-lucide="dna"></i></span>
+                <div class="logo-text">
+                    <h1>BioRec</h1>
+                    <p>BIO-INTELLIGENCE SUITE</p>
+                </div>
+            </div>
+            
+            <nav class="app-nav">
+                <button class="nav-btn active" id="btn-recommender" onclick="switchTab('recommender')">
+                    <i data-lucide="search-code"></i> Recommendation
+                </button>
+                <button class="nav-btn" id="btn-validation" onclick="switchTab('validation')">
+                    <i data-lucide="bar-chart-3"></i> Model Validation
+                </button>
+            </nav>
+
+            <div class="status-panel">
+                <div class="status-indicator online"></div>
+                <div class="status-info">
+                    <p class="status-title">Engine Active</p>
+                    <p class="status-sub">SVD & PyTorch GNN</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- TAB 1: Recommendation Engine -->
+            <section class="tab-content active" id="tab-recommender">
+                <div class="grid-container">
+                    <!-- Left Deck: Search and Table -->
+                    <div class="deck-left">
+                        <div class="card search-card">
+                            <div class="card-header">
+                                <span class="card-icon"><i data-lucide="search"></i></span>
+                                <h2>Target & Drug Exploration</h2>
+                            </div>
+                            
+                            <!-- Search Form -->
+                            <div class="search-box-container">
+                                <div class="input-wrapper">
+                                    <i data-lucide="microscope" class="input-icon"></i>
+                                    <input type="text" id="search-input" placeholder="Enter Gene (e.g. EGFR, TP53) or Drug (e.g. Imatinib)..." autocomplete="off" oninput="showAutocompleteSuggestions()">
+                                    <div class="autocomplete-list" id="autocomplete-popup"></div>
+                                </div>
+                                <button class="btn-primary" onclick="triggerSearch()">Analyze</button>
+                            </div>
+
+                            <!-- Model Selector Tab -->
+                            <div class="settings-row">
+                                <div class="setting-group">
+                                    <span class="setting-label">Modeling Method</span>
+                                    <div class="toggle-slider-container">
+                                        <button class="toggle-btn active" id="method-gnn" onclick="selectMethod('gnn')">GNN Model</button>
+                                        <button class="toggle-btn" id="method-svd" onclick="selectMethod('svd')">SVD Model</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Results Card -->
+                        <div class="card results-card">
+                            <div class="card-header flex-header">
+                                <div>
+                                    <span class="card-icon"><i data-lucide="list-ordered"></i></span>
+                                    <h2>Top Repurposing Candidates</h2>
+                                </div>
+                                <span class="results-count" id="results-count-badge">No Query Active</span>
+                            </div>
+                            <div class="table-container">
+                                <table id="results-table">
+                                    <thead>
+                                        <tr id="table-headers">
+                                            <th>Rank</th>
+                                            <th>Drug Candidate</th>
+                                            <th>Embedding Match</th>
+                                            <th>Association Type</th>
+                                            <th>Key Indications</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body">
+                                        <tr>
+                                            <td colspan="5" class="empty-state">
+                                                <i data-lucide="shield-alert"></i>
+                                                <p>Enter a gene or drug above to compute recommendations</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Deck: Interactive Graph Visualization -->
+                    <div class="deck-right">
+                        <div class="card graph-card">
+                            <div class="card-header flex-header">
+                                <div>
+                                    <span class="card-icon"><i data-lucide="network"></i></span>
+                                    <h2>Local Association Network</h2>
+                                </div>
+                                <button class="btn-icon" onclick="resetGraphPhysics()" title="Recenter Network"><i data-lucide="refresh-cw"></i></button>
+                            </div>
+                            <!-- Canvas Container -->
+                            <div class="canvas-wrapper">
+                                <canvas id="network-canvas"></canvas>
+                                <div class="canvas-legend">
+                                    <div class="legend-item"><span class="legend-dot drug-dot"></span> Drug</div>
+                                    <div class="legend-item"><span class="legend-dot gene-dot"></span> Gene/Protein</div>
+                                    <div class="legend-item"><span class="legend-line direct-line"></span> Direct Target</div>
+                                    <div class="legend-item"><span class="legend-line indirect-line"></span> Proximity Edge</div>
+                                </div>
+                                <div class="graph-loading-overlay" id="graph-loader">
+                                    <div class="loader-spinner"></div>
+                                    <p>Assembling Network Topography...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: Model Validation Dashboard -->
+            <section class="tab-content" id="tab-validation">
+                <div class="validation-layout">
+                    <!-- Metrics Summary Deck -->
+                    <div class="metrics-row">
+                        <!-- SVD Metrics Card -->
+                        <div class="card metric-glow-card svd-glow">
+                            <div class="glow-badge">SVD MODEL</div>
+                            <div class="metric-grid">
+                                <div class="metric-item">
+                                    <span class="metric-label">AUROC</span>
+                                    <span class="metric-value" id="val-svd-auroc">0.000</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">AUPR (Avg Precision)</span>
+                                    <span class="metric-value text-cyan" id="val-svd-aupr">0.000</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Recall@10</span>
+                                    <span class="metric-value" id="val-svd-r10">0.00%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Recall@50</span>
+                                    <span class="metric-value" id="val-svd-r50">0.00%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GNN Metrics Card -->
+                        <div class="card metric-glow-card gnn-glow">
+                            <div class="glow-badge badge-green">GNN AUTOENCODER</div>
+                            <div class="metric-grid">
+                                <div class="metric-item">
+                                    <span class="metric-label">AUROC</span>
+                                    <span class="metric-value" id="val-gnn-auroc">0.000</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">AUPR (Avg Precision)</span>
+                                    <span class="metric-value text-green" id="val-gnn-aupr">0.000</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Recall@10</span>
+                                    <span class="metric-value" id="val-gnn-r10">0.00%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Recall@50</span>
+                                    <span class="metric-value" id="val-gnn-r50">0.00%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <!-- ROC Curve Container -->
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <span class="card-icon"><i data-lucide="line-chart"></i></span>
+                                <h2>ROC Curves (Receiver Operating Characteristic)</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="roc-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- PR Curve Container -->
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <span class="card-icon"><i data-lucide="line-chart"></i></span>
+                                <h2>Precision-Recall Curves</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="pr-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation Log -->
+                    <div class="card console-card">
+                        <div class="card-header">
+                            <span class="card-icon"><i data-lucide="terminal"></i></span>
+                            <h2>Scientific Evaluation Logs</h2>
+                        </div>
+                        <div class="console-body" id="console-logs">
+                            <p class="console-line text-muted">[2026-05-21 00:00:00] BIOREC: Initializing 5-Fold Cross-Validation pipeline...</p>
+                            <p class="console-line text-muted">[2026-05-21 00:00:01] BIOREC: Positive links: 120 pairs | Negative links: 120 pairs</p>
+                            <p class="console-line text-info">[2026-05-21 00:00:02] SVD_MODEL: Completed matrix factorization on SPPM</p>
+                            <p class="console-line text-green">[2026-05-21 00:00:04] GNN_MODEL: Completed Graph Autoencoder (GAE) link reconstruction</p>
+                            <p class="console-line text-success">[2026-05-21 00:00:05] SYSTEM: Validation metrics loaded successfully.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Inject main logic -->
+    <script src="/static/script.js"></script>
+    <script>
+        // Initialize lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

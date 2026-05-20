@@ -1,0 +1,1432 @@
+{
+    "genes": [
+        "ABL1",
+        "ACE",
+        "ADIPOQ",
+        "ADRB1",
+        "ADRB2",
+        "AGT",
+        "AGTR1",
+        "AKT1",
+        "AMPK1",
+        "APOB",
+        "AVPR1A",
+        "BRAF",
+        "BRCA1",
+        "BRCA2",
+        "CACNA1C",
+        "CCL2",
+        "CD36",
+        "CD4",
+        "CD8A",
+        "CPT1A",
+        "CTLA4",
+        "CXCR4",
+        "EDN1",
+        "EGFR",
+        "ERBB2",
+        "F10",
+        "F2",
+        "FABP4",
+        "FASN",
+        "G6PD",
+        "GCK",
+        "HMGCR",
+        "HRAS",
+        "IFNG",
+        "IL1B",
+        "IL2",
+        "IL6",
+        "INS",
+        "INSR",
+        "JAK1",
+        "JAK2",
+        "JAK3",
+        "KCNH2",
+        "KIT",
+        "KRAS",
+        "LDLR",
+        "LEP",
+        "LEPR",
+        "MAPK1",
+        "MAPK3",
+        "MAPK8",
+        "MDM2",
+        "MET",
+        "MTOR",
+        "MYC",
+        "NFKB1",
+        "NOS3",
+        "NPPA",
+        "NPPB",
+        "PCK1",
+        "PDCD1",
+        "PDGFRA",
+        "PDGFRB",
+        "PIK3CA",
+        "PKM",
+        "PLAT",
+        "PPARG",
+        "PTEN",
+        "REN",
+        "RYR2",
+        "SCN5A",
+        "SERPINE1",
+        "SIRT1",
+        "SRC",
+        "SREBF1",
+        "STAT3",
+        "TGFB1",
+        "TNF",
+        "TP53",
+        "VWF"
+    ],
+    "ppi_edges": [
+        [
+            "TP53",
+            "EGFR"
+        ],
+        [
+            "TP53",
+            "BRCA2"
+        ],
+        [
+            "TP53",
+            "KRAS"
+        ],
+        [
+            "EGFR",
+            "BRCA1"
+        ],
+        [
+            "EGFR",
+            "SRC"
+        ],
+        [
+            "EGFR",
+            "BRCA2"
+        ],
+        [
+            "BRCA1",
+            "BRCA2"
+        ],
+        [
+            "BRCA1",
+            "MDM2"
+        ],
+        [
+            "BRCA2",
+            "AKT1"
+        ],
+        [
+            "AKT1",
+            "MTOR"
+        ],
+        [
+            "AKT1",
+            "PTEN"
+        ],
+        [
+            "AKT1",
+            "PIK3CA"
+        ],
+        [
+            "MTOR",
+            "KRAS"
+        ],
+        [
+            "MTOR",
+            "KIT"
+        ],
+        [
+            "KRAS",
+            "HRAS"
+        ],
+        [
+            "KRAS",
+            "BRAF"
+        ],
+        [
+            "KRAS",
+            "MYC"
+        ],
+        [
+            "HRAS",
+            "ABL1"
+        ],
+        [
+            "HRAS",
+            "MTOR"
+        ],
+        [
+            "HRAS",
+            "TP53"
+        ],
+        [
+            "ABL1",
+            "KIT"
+        ],
+        [
+            "ABL1",
+            "ERBB2"
+        ],
+        [
+            "ABL1",
+            "MET"
+        ],
+        [
+            "KIT",
+            "PDGFRA"
+        ],
+        [
+            "PDGFRA",
+            "PDGFRB"
+        ],
+        [
+            "PDGFRB",
+            "BRAF"
+        ],
+        [
+            "PDGFRB",
+            "PTEN"
+        ],
+        [
+            "BRAF",
+            "PTEN"
+        ],
+        [
+            "BRAF",
+            "BRCA1"
+        ],
+        [
+            "BRAF",
+            "MDM2"
+        ],
+        [
+            "PTEN",
+            "MDM2"
+        ],
+        [
+            "PTEN",
+            "MYC"
+        ],
+        [
+            "PTEN",
+            "PDGFRA"
+        ],
+        [
+            "MDM2",
+            "PIK3CA"
+        ],
+        [
+            "MDM2",
+            "HRAS"
+        ],
+        [
+            "MDM2",
+            "SRC"
+        ],
+        [
+            "PIK3CA",
+            "SRC"
+        ],
+        [
+            "PIK3CA",
+            "EGFR"
+        ],
+        [
+            "SRC",
+            "ERBB2"
+        ],
+        [
+            "SRC",
+            "AKT1"
+        ],
+        [
+            "SRC",
+            "MTOR"
+        ],
+        [
+            "ERBB2",
+            "MET"
+        ],
+        [
+            "ERBB2",
+            "KIT"
+        ],
+        [
+            "ERBB2",
+            "BRAF"
+        ],
+        [
+            "MET",
+            "MYC"
+        ],
+        [
+            "MET",
+            "TP53"
+        ],
+        [
+            "MET",
+            "BRCA1"
+        ],
+        [
+            "MYC",
+            "TP53"
+        ],
+        [
+            "MYC",
+            "PDGFRA"
+        ],
+        [
+            "TNF",
+            "IL6"
+        ],
+        [
+            "TNF",
+            "JAK1"
+        ],
+        [
+            "TNF",
+            "NFKB1"
+        ],
+        [
+            "IL6",
+            "IL1B"
+        ],
+        [
+            "IL6",
+            "CD8A"
+        ],
+        [
+            "IL6",
+            "JAK1"
+        ],
+        [
+            "IL1B",
+            "IL2"
+        ],
+        [
+            "IL1B",
+            "JAK2"
+        ],
+        [
+            "IL2",
+            "JAK1"
+        ],
+        [
+            "IL2",
+            "CD4"
+        ],
+        [
+            "IL2",
+            "MAPK3"
+        ],
+        [
+            "JAK1",
+            "JAK2"
+        ],
+        [
+            "JAK1",
+            "TGFB1"
+        ],
+        [
+            "JAK2",
+            "JAK3"
+        ],
+        [
+            "JAK2",
+            "CXCR4"
+        ],
+        [
+            "JAK2",
+            "STAT3"
+        ],
+        [
+            "JAK3",
+            "STAT3"
+        ],
+        [
+            "JAK3",
+            "NFKB1"
+        ],
+        [
+            "STAT3",
+            "NFKB1"
+        ],
+        [
+            "STAT3",
+            "MAPK1"
+        ],
+        [
+            "NFKB1",
+            "CXCR4"
+        ],
+        [
+            "NFKB1",
+            "IL2"
+        ],
+        [
+            "CXCR4",
+            "CCL2"
+        ],
+        [
+            "CXCR4",
+            "TNF"
+        ],
+        [
+            "CXCR4",
+            "MAPK1"
+        ],
+        [
+            "CCL2",
+            "CD4"
+        ],
+        [
+            "CCL2",
+            "PDCD1"
+        ],
+        [
+            "CCL2",
+            "NFKB1"
+        ],
+        [
+            "CD4",
+            "CD8A"
+        ],
+        [
+            "CD4",
+            "MAPK1"
+        ],
+        [
+            "CD4",
+            "MAPK3"
+        ],
+        [
+            "CD8A",
+            "CTLA4"
+        ],
+        [
+            "CD8A",
+            "MAPK8"
+        ],
+        [
+            "CD8A",
+            "IFNG"
+        ],
+        [
+            "CTLA4",
+            "PDCD1"
+        ],
+        [
+            "CTLA4",
+            "IL1B"
+        ],
+        [
+            "CTLA4",
+            "JAK3"
+        ],
+        [
+            "PDCD1",
+            "IFNG"
+        ],
+        [
+            "PDCD1",
+            "MAPK8"
+        ],
+        [
+            "IFNG",
+            "TGFB1"
+        ],
+        [
+            "IFNG",
+            "STAT3"
+        ],
+        [
+            "IFNG",
+            "JAK3"
+        ],
+        [
+            "TGFB1",
+            "MAPK1"
+        ],
+        [
+            "TGFB1",
+            "STAT3"
+        ],
+        [
+            "MAPK1",
+            "MAPK3"
+        ],
+        [
+            "MAPK3",
+            "MAPK8"
+        ],
+        [
+            "MAPK8",
+            "TNF"
+        ],
+        [
+            "MAPK8",
+            "STAT3"
+        ],
+        [
+            "MAPK8",
+            "JAK2"
+        ],
+        [
+            "INS",
+            "INSR"
+        ],
+        [
+            "INS",
+            "CPT1A"
+        ],
+        [
+            "INSR",
+            "PPARG"
+        ],
+        [
+            "INSR",
+            "SIRT1"
+        ],
+        [
+            "INSR",
+            "ADIPOQ"
+        ],
+        [
+            "PPARG",
+            "AMPK1"
+        ],
+        [
+            "PPARG",
+            "SREBF1"
+        ],
+        [
+            "PPARG",
+            "LDLR"
+        ],
+        [
+            "AMPK1",
+            "SREBF1"
+        ],
+        [
+            "AMPK1",
+            "CD36"
+        ],
+        [
+            "AMPK1",
+            "INSR"
+        ],
+        [
+            "SREBF1",
+            "HMGCR"
+        ],
+        [
+            "SREBF1",
+            "PCK1"
+        ],
+        [
+            "SREBF1",
+            "ADIPOQ"
+        ],
+        [
+            "HMGCR",
+            "LDLR"
+        ],
+        [
+            "HMGCR",
+            "PCK1"
+        ],
+        [
+            "LDLR",
+            "APOB"
+        ],
+        [
+            "LDLR",
+            "LEPR"
+        ],
+        [
+            "APOB",
+            "CPT1A"
+        ],
+        [
+            "APOB",
+            "G6PD"
+        ],
+        [
+            "CPT1A",
+            "FASN"
+        ],
+        [
+            "CPT1A",
+            "G6PD"
+        ],
+        [
+            "CPT1A",
+            "CD36"
+        ],
+        [
+            "FASN",
+            "SIRT1"
+        ],
+        [
+            "FASN",
+            "PKM"
+        ],
+        [
+            "FASN",
+            "INSR"
+        ],
+        [
+            "SIRT1",
+            "LEP"
+        ],
+        [
+            "SIRT1",
+            "AMPK1"
+        ],
+        [
+            "SIRT1",
+            "CD36"
+        ],
+        [
+            "LEP",
+            "LEPR"
+        ],
+        [
+            "LEP",
+            "ADIPOQ"
+        ],
+        [
+            "LEP",
+            "AMPK1"
+        ],
+        [
+            "LEPR",
+            "ADIPOQ"
+        ],
+        [
+            "LEPR",
+            "GCK"
+        ],
+        [
+            "LEPR",
+            "FABP4"
+        ],
+        [
+            "ADIPOQ",
+            "GCK"
+        ],
+        [
+            "ADIPOQ",
+            "AMPK1"
+        ],
+        [
+            "GCK",
+            "PKM"
+        ],
+        [
+            "GCK",
+            "SIRT1"
+        ],
+        [
+            "GCK",
+            "LEP"
+        ],
+        [
+            "PKM",
+            "G6PD"
+        ],
+        [
+            "PKM",
+            "ADIPOQ"
+        ],
+        [
+            "PKM",
+            "LEP"
+        ],
+        [
+            "G6PD",
+            "PCK1"
+        ],
+        [
+            "G6PD",
+            "AMPK1"
+        ],
+        [
+            "G6PD",
+            "SREBF1"
+        ],
+        [
+            "PCK1",
+            "FABP4"
+        ],
+        [
+            "PCK1",
+            "FASN"
+        ],
+        [
+            "FABP4",
+            "CD36"
+        ],
+        [
+            "FABP4",
+            "PPARG"
+        ],
+        [
+            "CD36",
+            "INS"
+        ],
+        [
+            "CD36",
+            "G6PD"
+        ],
+        [
+            "CD36",
+            "APOB"
+        ],
+        [
+            "ACE",
+            "AGT"
+        ],
+        [
+            "ACE",
+            "VWF"
+        ],
+        [
+            "AGT",
+            "AGTR1"
+        ],
+        [
+            "AGT",
+            "KCNH2"
+        ],
+        [
+            "AGT",
+            "CACNA1C"
+        ],
+        [
+            "AGTR1",
+            "NOS3"
+        ],
+        [
+            "NOS3",
+            "EDN1"
+        ],
+        [
+            "NOS3",
+            "CACNA1C"
+        ],
+        [
+            "NOS3",
+            "AGT"
+        ],
+        [
+            "EDN1",
+            "KCNH2"
+        ],
+        [
+            "EDN1",
+            "CACNA1C"
+        ],
+        [
+            "KCNH2",
+            "SCN5A"
+        ],
+        [
+            "KCNH2",
+            "AGTR1"
+        ],
+        [
+            "SCN5A",
+            "RYR2"
+        ],
+        [
+            "SCN5A",
+            "F2"
+        ],
+        [
+            "RYR2",
+            "CACNA1C"
+        ],
+        [
+            "RYR2",
+            "ADRB1"
+        ],
+        [
+            "CACNA1C",
+            "ADRB1"
+        ],
+        [
+            "ADRB1",
+            "ADRB2"
+        ],
+        [
+            "ADRB1",
+            "NPPB"
+        ],
+        [
+            "ADRB2",
+            "AVPR1A"
+        ],
+        [
+            "ADRB2",
+            "NPPA"
+        ],
+        [
+            "ADRB2",
+            "SCN5A"
+        ],
+        [
+            "AVPR1A",
+            "NPPA"
+        ],
+        [
+            "AVPR1A",
+            "AGT"
+        ],
+        [
+            "AVPR1A",
+            "AGTR1"
+        ],
+        [
+            "NPPA",
+            "NPPB"
+        ],
+        [
+            "NPPA",
+            "ACE"
+        ],
+        [
+            "NPPB",
+            "REN"
+        ],
+        [
+            "NPPB",
+            "VWF"
+        ],
+        [
+            "NPPB",
+            "F2"
+        ],
+        [
+            "REN",
+            "PLAT"
+        ],
+        [
+            "REN",
+            "F2"
+        ],
+        [
+            "REN",
+            "NOS3"
+        ],
+        [
+            "PLAT",
+            "F2"
+        ],
+        [
+            "PLAT",
+            "NPPB"
+        ],
+        [
+            "PLAT",
+            "ADRB2"
+        ],
+        [
+            "F2",
+            "F10"
+        ],
+        [
+            "F2",
+            "EDN1"
+        ],
+        [
+            "F10",
+            "SERPINE1"
+        ],
+        [
+            "F10",
+            "NPPB"
+        ],
+        [
+            "F10",
+            "ACE"
+        ],
+        [
+            "SERPINE1",
+            "VWF"
+        ],
+        [
+            "SERPINE1",
+            "ADRB1"
+        ],
+        [
+            "SERPINE1",
+            "ACE"
+        ],
+        [
+            "VWF",
+            "PLAT"
+        ],
+        [
+            "HRAS",
+            "CCL2"
+        ],
+        [
+            "MYC",
+            "TGFB1"
+        ],
+        [
+            "HRAS",
+            "NFKB1"
+        ],
+        [
+            "PIK3CA",
+            "CTLA4"
+        ],
+        [
+            "ERBB2",
+            "CD4"
+        ],
+        [
+            "IFNG",
+            "G6PD"
+        ],
+        [
+            "PDCD1",
+            "FASN"
+        ],
+        [
+            "CD8A",
+            "PKM"
+        ],
+        [
+            "CD4",
+            "LEPR"
+        ],
+        [
+            "CD8A",
+            "PCK1"
+        ],
+        [
+            "LEPR",
+            "NOS3"
+        ],
+        [
+            "SREBF1",
+            "PLAT"
+        ],
+        [
+            "LEPR",
+            "AGTR1"
+        ],
+        [
+            "PKM",
+            "CACNA1C"
+        ],
+        [
+            "FASN",
+            "SCN5A"
+        ],
+        [
+            "ACE",
+            "KIT"
+        ],
+        [
+            "EDN1",
+            "PDGFRA"
+        ],
+        [
+            "RYR2",
+            "MDM2"
+        ],
+        [
+            "VWF",
+            "PDGFRA"
+        ],
+        [
+            "RYR2",
+            "MET"
+        ]
+    ],
+    "drugs": {
+        "Imatinib": {
+            "targets": [
+                "ABL1",
+                "KIT",
+                "PDGFRB",
+                "PDGFRA"
+            ],
+            "diseases": [
+                "Leukemia",
+                "Gastrointestinal Stromal Tumor"
+            ]
+        },
+        "Gefitinib": {
+            "targets": [
+                "EGFR",
+                "ERBB2"
+            ],
+            "diseases": [
+                "Lung Cancer",
+                "Breast Cancer"
+            ]
+        },
+        "Trastuzumab": {
+            "targets": [
+                "ERBB2"
+            ],
+            "diseases": [
+                "Breast Cancer",
+                "Gastric Cancer"
+            ]
+        },
+        "Aspirin": {
+            "targets": [
+                "PTGS1",
+                "PTGS2",
+                "TNF",
+                "NFKB1"
+            ],
+            "diseases": [
+                "Inflammation",
+                "Pain",
+                "Thrombosis"
+            ]
+        },
+        "Metformin": {
+            "targets": [
+                "AMPK1",
+                "SIRT1",
+                "PPARG"
+            ],
+            "diseases": [
+                "Type 2 Diabetes",
+                "Obesity"
+            ]
+        },
+        "Atorvastatin": {
+            "targets": [
+                "HMGCR",
+                "LDLR"
+            ],
+            "diseases": [
+                "Hypercholesterolemia",
+                "Cardiovascular Disease"
+            ]
+        },
+        "Lisinopril": {
+            "targets": [
+                "ACE",
+                "NOS3"
+            ],
+            "diseases": [
+                "Hypertension",
+                "Heart Failure"
+            ]
+        },
+        "Everolimus": {
+            "targets": [
+                "MTOR",
+                "AKT1"
+            ],
+            "diseases": [
+                "Renal Cancer",
+                "Breast Cancer"
+            ]
+        },
+        "Captopril": {
+            "targets": [
+                "ACE"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "Sorafenib": {
+            "targets": [
+                "BRAF",
+                "KIT",
+                "PDGFRB",
+                "VEGFA"
+            ],
+            "diseases": [
+                "Renal Cancer",
+                "Hepatocellular Carcinoma"
+            ]
+        },
+        "Infliximab": {
+            "targets": [
+                "TNF"
+            ],
+            "diseases": [
+                "Rheumatoid Arthritis",
+                "Crohns Disease"
+            ]
+        },
+        "Tocilizumab": {
+            "targets": [
+                "IL6"
+            ],
+            "diseases": [
+                "Rheumatoid Arthritis",
+                "COVID-19 Cytokine Storm"
+            ]
+        },
+        "Doxorubicin": {
+            "targets": [
+                "TP53",
+                "BRCA1",
+                "MYC"
+            ],
+            "diseases": [
+                "Lymphoma",
+                "Breast Cancer",
+                "Sarcoma"
+            ]
+        },
+        "Paclitaxel": {
+            "targets": [
+                "AKT1",
+                "MAPK1",
+                "TP53"
+            ],
+            "diseases": [
+                "Ovarian Cancer",
+                "Breast Cancer",
+                "Lung Cancer"
+            ]
+        },
+        "Valsartan": {
+            "targets": [
+                "AGTR1"
+            ],
+            "diseases": [
+                "Hypertension",
+                "Heart Failure"
+            ]
+        },
+        "Propranolol": {
+            "targets": [
+                "ADRB1",
+                "ADRB2"
+            ],
+            "diseases": [
+                "Hypertension",
+                "Arrhythmia",
+                "Anxiety"
+            ]
+        },
+        "Amlodipine": {
+            "targets": [
+                "CACNA1C"
+            ],
+            "diseases": [
+                "Hypertension",
+                "Angina"
+            ]
+        },
+        "Warfarin": {
+            "targets": [
+                "F2",
+                "F10"
+            ],
+            "diseases": [
+                "Thrombosis",
+                "Atrial Fibrillation"
+            ]
+        },
+        "Insulin": {
+            "targets": [
+                "INSR",
+                "INS"
+            ],
+            "diseases": [
+                "Diabetes mellitus"
+            ]
+        },
+        "Pioglitazone": {
+            "targets": [
+                "PPARG",
+                "SREBF1"
+            ],
+            "diseases": [
+                "Type 2 Diabetes"
+            ]
+        },
+        "BioMed-101": {
+            "targets": [
+                "JAK1",
+                "CXCR4",
+                "IFNG"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "OncoStop-A": {
+            "targets": [
+                "LEPR",
+                "GCK"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "CardioGlow": {
+            "targets": [
+                "MAPK1"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "MetaboFix": {
+            "targets": [
+                "CD36"
+            ],
+            "diseases": [
+                "Oncology"
+            ]
+        },
+        "NeuroZepam": {
+            "targets": [
+                "MAPK3",
+                "IFNG",
+                "CXCR4"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "Immunex-Beta": {
+            "targets": [
+                "IL2"
+            ],
+            "diseases": [
+                "Autoimmune"
+            ]
+        },
+        "ArthriCure": {
+            "targets": [
+                "F2",
+                "EDN1"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "LipidDown": {
+            "targets": [
+                "INS",
+                "HMGCR",
+                "ADIPOQ"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "VasoFlow": {
+            "targets": [
+                "INSR",
+                "G6PD"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "DiabeControl": {
+            "targets": [
+                "INSR",
+                "PKM"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "Zetaplat": {
+            "targets": [
+                "ABL1",
+                "PDGFRB"
+            ],
+            "diseases": [
+                "Autoimmune"
+            ]
+        },
+        "DuoCaine": {
+            "targets": [
+                "NFKB1"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "PressoGard": {
+            "targets": [
+                "PPARG"
+            ],
+            "diseases": [
+                "Autoimmune"
+            ]
+        },
+        "ThromboNil": {
+            "targets": [
+                "CCL2",
+                "STAT3"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "StatGuard": {
+            "targets": [
+                "LDLR",
+                "ADIPOQ",
+                "HMGCR"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "RespiClean": {
+            "targets": [
+                "CD8A"
+            ],
+            "diseases": [
+                "Oncology"
+            ]
+        },
+        "GeneMend": {
+            "targets": [
+                "INSR"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "CellShield": {
+            "targets": [
+                "NPPB",
+                "VWF",
+                "REN"
+            ],
+            "diseases": [
+                "Autoimmune"
+            ]
+        },
+        "ProteoBlock": {
+            "targets": [
+                "JAK1",
+                "CTLA4"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "Apoptin": {
+            "targets": [
+                "CD36"
+            ],
+            "diseases": [
+                "Oncology"
+            ]
+        },
+        "Mitocare": {
+            "targets": [
+                "CD8A"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "KinaseOff": {
+            "targets": [
+                "CD8A",
+                "MAPK8",
+                "IL6"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "CytokineBan": {
+            "targets": [
+                "G6PD",
+                "LEP",
+                "GCK"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "SignalHalve": {
+            "targets": [
+                "PPARG",
+                "SREBF1",
+                "LDLR"
+            ],
+            "diseases": [
+                "Autoimmune"
+            ]
+        },
+        "AngioStop": {
+            "targets": [
+                "ABL1",
+                "AKT1"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "GlycoReg": {
+            "targets": [
+                "LEP",
+                "PPARG",
+                "HMGCR"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "MyoRelax": {
+            "targets": [
+                "ADIPOQ",
+                "LEP",
+                "GCK"
+            ],
+            "diseases": [
+                "Autoimmune"
+            ]
+        },
+        "AntiThromb": {
+            "targets": [
+                "EGFR",
+                "BRCA2",
+                "MET"
+            ],
+            "diseases": [
+                "Hypertension"
+            ]
+        },
+        "FibroBan": {
+            "targets": [
+                "ADIPOQ",
+                "LEP",
+                "PKM"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        },
+        "OxiClear": {
+            "targets": [
+                "G6PD"
+            ],
+            "diseases": [
+                "Metabolic Syndrome"
+            ]
+        }
+    }
+}

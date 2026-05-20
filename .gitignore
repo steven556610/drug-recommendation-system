@@ -1,0 +1,46 @@
+# ====================================================================
+# Python Byte-compiled / Optimized / DLL Files
+# ====================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ====================================================================
+# Environments and Virtualenvs
+# ====================================================================
+.env
+.venv
+env/
+venv/
+ENV/
+*.bak
+*.user
+
+# ====================================================================
+# IDE / Editor Files
+# ====================================================================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db
+
+# ====================================================================
+# Bulky Biological Datasets & Heavy Model Weights (CRITICAL FOR GITHUB)
+# ====================================================================
+data/raw/*
+!data/raw/.gitkeep
+
+data/processed/*
+!data/processed/.gitkeep
+!data/processed/demo_data.json
+
+models/*.pkl
+models/*.pt
+models/*.json
+!models/.gitkeep
