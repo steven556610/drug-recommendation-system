@@ -71,7 +71,7 @@
                             <div class="search-box-container">
                                 <div class="input-wrapper">
                                     <i data-lucide="microscope" class="input-icon"></i>
-                                    <input type="text" id="search-input" placeholder="Enter Gene (e.g. EGFR, TP53) or Drug (e.g. Imatinib)..." autocomplete="off" oninput="showAutocompleteSuggestions()">
+                                    <input type="text" id="search-input" placeholder="Enter Disease (e.g. Oncology), Gene (e.g. EGFR), or Drug..." autocomplete="off" oninput="showAutocompleteSuggestions()">
                                     <div class="autocomplete-list" id="autocomplete-popup"></div>
                                 </div>
                                 <button class="btn-primary" onclick="triggerSearch()">Analyze</button>
@@ -82,6 +82,7 @@
                                 <div class="setting-group">
                                     <span class="setting-label">Modeling Method</span>
                                     <div class="toggle-slider-container">
+                                        <button class="toggle-btn" id="method-multi" onclick="selectMethod('multi')">Consensus (All 7)</button>
                                         <button class="toggle-btn active" id="method-gnn" onclick="selectMethod('gnn')">GNN Model</button>
                                         <button class="toggle-btn" id="method-svd" onclick="selectMethod('svd')">SVD Model</button>
                                     </div>
@@ -138,6 +139,7 @@
                                 <div class="canvas-legend">
                                     <div class="legend-item"><span class="legend-dot drug-dot"></span> Drug</div>
                                     <div class="legend-item"><span class="legend-dot gene-dot"></span> Gene/Protein</div>
+                                    <div class="legend-item"><span class="legend-dot disease-dot" style="background: linear-gradient(135deg, #f472b6, #be185d);"></span> Disease</div>
                                     <div class="legend-item"><span class="legend-line direct-line"></span> Direct Target</div>
                                     <div class="legend-item"><span class="legend-line indirect-line"></span> Proximity Edge</div>
                                 </div>

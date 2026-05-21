@@ -21,6 +21,11 @@ from data_pipeline import DataPipeline
 from svd_model import SVDRecommender
 from gnn_model import GNNTrainer
 from validation import ModelValidator
+from node2vec_model import Node2VecModel
+from network_propagation_model import NetworkPropagationModel
+from kg_embedding_model import KGEmbeddingModel
+from fingerprint_model import FingerprintModel
+from graph_traversal_model import GraphTraversalModel
 
 logger = get_logger("CLI")
 
@@ -94,7 +99,23 @@ def main():
         gnn = GNNTrainer(embedding_dim=args.embedding_dim, epochs=args.epochs)
         gnn.train()
         
-        # 3. Perform 5-Fold Cross-Validation Metrics Compilation
+        # 3. Train 5 External Methods
+        logger.info("Training Node2Vec...")
+        Node2VecModel().train()
+        
+        logger.info("Training Network Propagation...")
+        NetworkPropagationModel().train()
+        
+        logger.info("Training TransE KG Embedding...")
+        KGEmbeddingModel(epochs=10).train()
+        
+        logger.info("Computing Chemical Fingerprint Similarities...")
+        FingerprintModel().train()
+        
+        logger.info("Executing Graph Traversal (Orbifold)...")
+        GraphTraversalModel().train()
+        
+        # 4. Perform 5-Fold Cross-Validation Metrics Compilation
         logger.info("Executing 5-Fold Cross-Validation link prediction evaluation...")
         validator = ModelValidator()
         validator.run_cross_validation()
@@ -125,7 +146,14 @@ def main():
         gnn = GNNTrainer(embedding_dim=args.embedding_dim, epochs=args.epochs)
         gnn.train()
         
-        # C. Cross-Validate
+        # C. Train 5 External Methods
+        Node2VecModel().train()
+        NetworkPropagationModel().train()
+        KGEmbeddingModel(epochs=10).train()
+        FingerprintModel().train()
+        GraphTraversalModel().train()
+        
+        # D. Cross-Validate
         validator = ModelValidator()
         validator.run_cross_validation()
         

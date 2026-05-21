@@ -72,7 +72,8 @@ def get_autocomplete_list():
             recommender.load_models()
         return {
             "genes": recommender.data["genes"],
-            "drugs": recommender.data["drugs"]
+            "drugs": recommender.data["drugs"],
+            "diseases": recommender.data.get("diseases", [])
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -92,6 +93,19 @@ def recommend_drugs(name: str, method: str = "gnn"):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/recommend/multi")
+def recommend_drugs_multi(name: str):
+    """
+    Fetches consensus recommendations across all 7 methods for a queried gene name.
+    """
+    try:
+        recs = recommender.recommend_multi_method(name, top_n=15)
+        return {"query": name, "method": "CONSENSUS", "results": recs}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/recommend/drug")
 def recommend_similar_drugs(name: str, method: str = "gnn"):
     """
@@ -101,6 +115,21 @@ def recommend_similar_drugs(name: str, method: str = "gnn"):
         raise HTTPException(status_code=400, detail="Invalid method. Use 'svd' or 'gnn'.")
     try:
         recs = recommender.recommend_similar_drugs(name, method=method, top_n=10)
+        return {"query": name, "method": method.upper(), "results": recs}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/recommend/disease")
+def recommend_for_disease(name: str, method: str = "gnn"):
+    """
+    Fetches top candidate genes and repurposed drugs for a queried disease.
+    """
+    if method not in ["svd", "gnn"]:
+        raise HTTPException(status_code=400, detail="Invalid method. Use 'svd' or 'gnn'.")
+    try:
+        recs = recommender.recommend_for_disease(name, method=method, top_n=10)
         return {"query": name, "method": method.upper(), "results": recs}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

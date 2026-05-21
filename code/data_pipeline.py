@@ -83,17 +83,30 @@ class DataPipeline:
             target_class = random.choice([cancer_genes, immune_genes, metabolic_genes, cardio_genes])
             targets = random.sample(target_class, k=random.randint(1, 3))
             disease = random.choice(["Oncology", "Autoimmune", "Metabolic Syndrome", "Hypertension"])
+            # Generate a mock 256-dim Morgan fingerprint
+            fingerprint = [random.choice([0, 1]) for _ in range(256)]
             drugs_dict[name] = {
                 "targets": targets,
                 "diseases": [disease],
-                "smiles": self._get_mock_smiles(name)
+                "smiles": self._get_mock_smiles(name),
+                "fingerprint": fingerprint
             }
             
+        diseases = ["Oncology", "Autoimmune", "Metabolic Syndrome", "Hypertension"]
+        disease_to_genes = {
+            "Oncology": cancer_genes,
+            "Autoimmune": immune_genes,
+            "Metabolic Syndrome": metabolic_genes,
+            "Hypertension": cardio_genes
+        }
+
         # Compile everything into a single JSON
         demo_data = {
             "genes": all_genes,
             "ppi_edges": ppi_edges,
-            "drugs": drugs_dict
+            "drugs": drugs_dict,
+            "diseases": diseases,
+            "disease_genes": disease_to_genes
         }
         
         with open(self.demo_data_path, "w", encoding="utf-8") as f:
@@ -126,6 +139,8 @@ class DataPipeline:
         genes = data["genes"]
         drugs = data["drugs"]
         ppi_edges = data["ppi_edges"]
+        diseases = data.get("diseases", [])
+        disease_genes = data.get("disease_genes", {})
         
         gene_to_idx = {gene: idx for idx, gene in enumerate(genes)}
         num_genes = len(genes)
@@ -185,10 +200,14 @@ class DataPipeline:
         output = {
             "drugs": drug_names,
             "genes": genes,
+            "diseases": diseases,
             "sppm": sppm,
             "ppi_graph": {g: list(neighbors) for g, neighbors in ppi_graph.items()},
             "drug_targets": {d: drugs[d]["targets"] for d in drug_names},
-            "indications": {d: drugs[d]["diseases"] for d in drug_names}
+            "indications": {d: drugs[d]["diseases"] for d in drug_names},
+            "disease_genes": disease_genes,
+            "drug_smiles": {d: drugs[d].get("smiles", "") for d in drug_names},
+            "drug_fingerprints": {d: drugs[d].get("fingerprint", [0]*256) for d in drug_names},
         }
         
         with open(self.sppm_path, "wb") as f:

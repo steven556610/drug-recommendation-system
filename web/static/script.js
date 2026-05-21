@@ -5,7 +5,7 @@
 // App State Management
 let currentMethod = "gnn";
 let currentTab = "recommender";
-let autocompleteData = { genes: [], drugs: [] };
+let autocompleteData = { genes: [], drugs: [], diseases: [] };
 let graphData = { nodes: [], links: [] };
 
 // Canvas Force-Directed Engine State
@@ -53,6 +53,7 @@ function switchTab(tabName) {
 
 function selectMethod(method) {
     currentMethod = method;
+    document.getElementById("method-multi").classList.toggle("active", method === "multi");
     document.getElementById("method-gnn").classList.toggle("active", method === "gnn");
     document.getElementById("method-svd").classList.toggle("active", method === "svd");
     
@@ -90,8 +91,9 @@ function showAutocompleteSuggestions() {
     // Filter genes and drugs matching characters
     const matchingGenes = autocompleteData.genes.filter(g => g.toLowerCase().includes(query)).slice(0, 5);
     const matchingDrugs = autocompleteData.drugs.filter(d => d.toLowerCase().includes(query)).slice(0, 5);
+    const matchingDiseases = (autocompleteData.diseases || []).filter(d => d.toLowerCase().includes(query)).slice(0, 5);
     
-    if (matchingGenes.length === 0 && matchingDrugs.length === 0) {
+    if (matchingGenes.length === 0 && matchingDrugs.length === 0 && matchingDiseases.length === 0) {
         popup.style.display = "none";
         return;
     }
@@ -111,6 +113,14 @@ function showAutocompleteSuggestions() {
         item.className = "autocomplete-item";
         item.innerHTML = `<span class="autocomplete-badge badge-drug">drug</span> <strong>${drug}</strong>`;
         item.onclick = () => selectSuggestion(drug);
+        popup.appendChild(item);
+    });
+    
+    matchingDiseases.forEach(disease => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+        item.innerHTML = `<span class="autocomplete-badge badge-disease" style="background: rgba(236,72,153,0.1); color: #ec4899; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-right: 8px;">disease</span> <strong>${disease}</strong>`;
+        item.onclick = () => selectSuggestion(disease);
         popup.appendChild(item);
     });
     
@@ -147,21 +157,39 @@ async function triggerSearch() {
         // Determine query type (is it gene or drug)
         const isGene = autocompleteData.genes.some(g => g.toLowerCase() === query.toLowerCase());
         const isDrug = autocompleteData.drugs.some(d => d.toLowerCase() === query.toLowerCase());
+        const isDisease = (autocompleteData.diseases || []).some(d => d.toLowerCase() === query.toLowerCase());
         
         let url = "";
         let matchedName = query;
+        let queryType = "gene";
         
-        if (isGene) {
-            // Find casing matches
+        if (currentMethod === "multi") {
+            // Multi-method currently only implemented for gene target consensus
+            if (!isGene) {
+                showEmptyState("Consensus (All 7) method currently only supports Gene Target queries. Try entering 'EGFR' or 'TP53'.");
+                loader.classList.remove("active");
+                return;
+            }
+            matchedName = autocompleteData.genes.find(g => g.toLowerCase() === query.toLowerCase());
+            url = `/api/recommend/multi?name=${matchedName}`;
+            queryType = "multi";
+        } else if (isGene) {
             matchedName = autocompleteData.genes.find(g => g.toLowerCase() === query.toLowerCase());
             url = `/api/recommend/gene?name=${matchedName}&method=${currentMethod}`;
+            queryType = "gene";
         } else if (isDrug) {
             matchedName = autocompleteData.drugs.find(d => d.toLowerCase() === query.toLowerCase());
             url = `/api/recommend/drug?name=${matchedName}&method=${currentMethod}`;
+            queryType = "drug";
+        } else if (isDisease) {
+            matchedName = autocompleteData.diseases.find(d => d.toLowerCase() === query.toLowerCase());
+            url = `/api/recommend/disease?name=${matchedName}&method=${currentMethod}`;
+            queryType = "disease";
         } else {
             // Fallback default search
             matchedName = query;
             url = `/api/recommend/gene?name=${matchedName}&method=${currentMethod}`;
+            queryType = "gene";
         }
         
         input.value = matchedName; // Update text capitalization
@@ -177,7 +205,7 @@ async function triggerSearch() {
         const recData = await recResponse.json();
         
         // Populate results table
-        populateTable(recData.results, isGene);
+        populateTable(recData, queryType);
         
         // Fetch network structure
         const netResponse = await fetch(`/api/network?query=${matchedName}&method=${currentMethod}`);
@@ -193,15 +221,92 @@ async function triggerSearch() {
     }
 }
 
-function populateTable(results, isGeneQuery) {
+function populateTable(data, queryType) {
     const tableBody = document.getElementById("table-body");
     const badge = document.getElementById("results-count-badge");
     const headers = document.getElementById("table-headers");
-    
+    // Handle disease query which returns an object with genes and drugs arrays
+    if (queryType === "disease") {
+        const genes = data.genes || [];
+        const drugs = data.drugs || [];
+        
+        badge.textContent = `${genes.length} Genes, ${drugs.length} Drugs Loaded`;
+        
+        headers.innerHTML = `
+            <th>Rank/Type</th>
+            <th>Candidate</th>
+            <th>Match Score</th>
+            <th>Category</th>
+            <th>Indications</th>
+        `;
+        
+        tableBody.innerHTML = "";
+        
+        if (genes.length === 0 && drugs.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="empty-state">No candidates returned</td></tr>`;
+            return;
+        }
+        
+        // Append Genes
+        genes.forEach((row, i) => {
+            const tr = document.createElement("tr");
+            const percentage = Math.round(row.score * 100);
+            const typeClass = row.type === "Known Marker" ? "type-direct" : "type-repurposed";
+            tr.innerHTML = `
+                <td style="font-weight: 700; color: #64748b;">G-${i+1}</td>
+                <td style="font-weight: 600; color: #f0f3f8;">${row.gene}</td>
+                <td>
+                    <div class="score-cell">
+                        <span class="score-num">${row.score.toFixed(3)}</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="badge-type ${typeClass}">${row.type}</span></td>
+                <td class="text-muted">-</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        // Append Drugs
+        drugs.forEach((row) => {
+            const tr = document.createElement("tr");
+            const percentage = Math.round(row.score * 100);
+            const typeClass = row.type === "Approved Indication" ? "type-direct" : "type-repurposed";
+            tr.innerHTML = `
+                <td style="font-weight: 700; color: #64748b;">D-${row.rank}</td>
+                <td style="font-weight: 600; color: #f0f3f8;">${row.drug}</td>
+                <td>
+                    <div class="score-cell">
+                        <span class="score-num">${row.score.toFixed(3)}</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="badge-type ${typeClass}">${row.type}</span></td>
+                <td class="text-muted" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${row.indications}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        return;
+    }
+
+    const results = data;
     badge.textContent = `${results.length} Candidates Loaded`;
     
     // Set headers
-    if (isGeneQuery) {
+    if (queryType === "multi") {
+        headers.innerHTML = `
+            <th>Rank</th>
+            <th>Drug Candidate</th>
+            <th>Consensus Score</th>
+            <th>Methods Agreed</th>
+            <th>Key Indications</th>
+        `;
+    } else if (queryType === "gene") {
         headers.innerHTML = `
             <th>Rank</th>
             <th>Drug Candidate</th>
@@ -229,7 +334,25 @@ function populateTable(results, isGeneQuery) {
         const tr = document.createElement("tr");
         const percentage = Math.round(row.score * 100);
         
-        if (isGeneQuery) {
+        if (queryType === "multi") {
+            const typeClass = row.type === "Direct Target" ? "type-direct" : "type-repurposed";
+            tr.innerHTML = `
+                <td style="font-weight: 700; color: #64748b;">#${row.rank}</td>
+                <td style="font-weight: 600; color: #f0f3f8;">${row.drug} <span class="badge-type ${typeClass}" style="margin-left:8px;font-size:0.7em;">${row.type}</span></td>
+                <td>
+                    <div class="score-cell">
+                        <span class="score-num">${row.consensus_score.toFixed(3)}</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${Math.round(row.consensus_score * 100)}%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div style="font-weight:600; color:#38bdf8;">${row.methods_agreed} / 7</div>
+                </td>
+                <td class="text-muted" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${row.indications}</td>
+            `;
+        } else if (queryType === "gene") {
             const typeClass = row.type === "Direct Target" ? "type-direct" : "type-repurposed";
             tr.innerHTML = `
                 <td style="font-weight: 700; color: #64748b;">#${row.rank}</td>
@@ -298,8 +421,8 @@ function initNetworkSimulation(network, queryNodeName) {
             y: canvas.height / 2 + (Math.random() - 0.5) * 100,
             vx: 0,
             vy: 0,
-            radius: isQuery ? 15 : (n.type === "drug" ? 10 : 8),
-            mass: isQuery ? 2.5 : 1.0,
+            radius: isQuery ? 15 : (n.type === "drug" ? 10 : (n.type === "disease" ? 12 : 8)),
+            mass: isQuery ? 2.5 : (n.type === "disease" ? 1.5 : 1.0),
             isQuery: isQuery
         };
     });
@@ -415,18 +538,22 @@ function renderGraph() {
         ctx.lineTo(t.x, t.y);
         
         // Link style matching biological mapping type
-        if (link.type === "direct") {
-            ctx.strokeStyle = "rgba(255, 87, 34, 0.4)";
+        if (link.type === "direct" || link.type === "disease_drug" || link.type === "disease_gene") {
+            ctx.strokeStyle = link.type.startsWith("disease") ? "rgba(236, 72, 153, 0.4)" : "rgba(255, 87, 34, 0.4)";
             ctx.lineWidth = 2.5;
             ctx.setLineDash([]);
         } else if (link.type === "repurposed") {
             ctx.strokeStyle = "rgba(0, 240, 255, 0.35)";
             ctx.lineWidth = 1.8;
             ctx.setLineDash([4, 4]); // Dashed line representing implicit prediction
-        } else if (link.type === "similarity") {
+        } else if (link.type === "similarity" || link.type === "similar_drug") {
             ctx.strokeStyle = "rgba(138, 43, 226, 0.35)";
             ctx.lineWidth = 1.8;
             ctx.setLineDash([2, 4]);
+        } else if (link.type === "indication") {
+            ctx.strokeStyle = "rgba(236, 72, 153, 0.35)";
+            ctx.lineWidth = 2.0;
+            ctx.setLineDash([3, 3]);
         } else {
             ctx.strokeStyle = "rgba(148, 163, 184, 0.2)";
             ctx.lineWidth = 1.2;
@@ -446,11 +573,14 @@ function renderGraph() {
         if (node.isQuery) {
             // Giant glowing query node
             ctx.shadowBlur = 20;
-            ctx.shadowColor = node.type === "drug" ? "#00f0ff" : "#9d4edd";
+            ctx.shadowColor = node.type === "drug" ? "#00f0ff" : (node.type === "disease" ? "#ec4899" : "#9d4edd");
             
             if (node.type === "drug") {
                 gradient.addColorStop(0, "#00f0ff");
                 gradient.addColorStop(1, "#00a8cc");
+            } else if (node.type === "disease") {
+                gradient.addColorStop(0, "#f472b6");
+                gradient.addColorStop(1, "#be185d");
             } else {
                 gradient.addColorStop(0, "#c77dff");
                 gradient.addColorStop(1, "#7b2cbf");
@@ -460,6 +590,9 @@ function renderGraph() {
             if (node.type === "drug") {
                 gradient.addColorStop(0, "#00d2fc");
                 gradient.addColorStop(1, "#0081a7");
+            } else if (node.type === "disease") {
+                gradient.addColorStop(0, "#db2777");
+                gradient.addColorStop(1, "#831843");
             } else {
                 gradient.addColorStop(0, "#9d4edd");
                 gradient.addColorStop(1, "#5a189a");
