@@ -14,16 +14,24 @@ An advanced, interactive drug recommendation and repurposing framework. By integ
 Traditional drug-target predictions often suffer from severe **data sparsity**. To address this, we implement the core concept of network-based enhancement via **Shortest-Path Proximity Matrices (SPPM)**:
 
 ### 1. Shortest-Path Proximity (SPPM)
+
 For any drug $d$ targeting a set of proteins $T_d$, we evaluate the topological proximity to every other protein $p$ in the STRING PPI network:
-$$L(d, p) = \min_{t \in T_d} \text{shortest\_path\_length}(t, p)$$
+
+$$
+L(d, p) = \min_{t \in T_d} \text{shortest\_path\_length}(t, p)
+$$
 
 We then convert this graph-distance into a continuous, decaying proximity score:
-$$S_{prox}(d, p) = \begin{cases} 
+
+$$
+S_{\text{prox}}(d, p) = \begin{cases}
 1.0 & \text{if } L(d, p) = 0 \text{ (Direct Target)} \\
-\alpha^{L(d, p)} & \text{if } 0 < L(d, p) \le L_{max} \\
-0 & \text{if } L(d, p) > L_{max} \text{ or unreachable}
-\end{cases}$$
-*(where $\alpha = 0.5$ is the decay factor and $L_{max} = 3$ is the propagation limit).*
+\alpha^{L(d, p)} & \text{if } 0 < L(d, p) \le L_{\text{max}} \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+*(where $\alpha = 0.5$ is the decay factor and $L_{\text{max}} = 3$ is the propagation limit.)*
 
 ### 2. Dual Recommendation Approaches
 *   **Approach A (SPPM-SVD)**: Singular Value Decomposition (SVD) factorizes the dense proximity-weighted drug-protein matrix to capture latent semantic associations:

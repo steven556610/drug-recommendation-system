@@ -4,6 +4,7 @@ import pickle
 import random
 import numpy as np
 from utils import get_logger, get_project_root
+import requests
 
 logger = get_logger("DataPipeline")
 
@@ -67,30 +68,7 @@ class DataPipeline:
                 add_ppi(g1, g2)
                 
         # 3. Create realistic Drugs and their Target Mappings (DrugBank style)
-        drugs_dict = {
-            "Imatinib": {"targets": ["ABL1", "KIT", "PDGFRB", "PDGFRA"], "diseases": ["Leukemia", "Gastrointestinal Stromal Tumor"]},
-            "Gefitinib": {"targets": ["EGFR", "ERBB2"], "diseases": ["Lung Cancer", "Breast Cancer"]},
-            "Trastuzumab": {"targets": ["ERBB2"], "diseases": ["Breast Cancer", "Gastric Cancer"]},
-            "Aspirin": {"targets": ["PTGS1", "PTGS2", "TNF", "NFKB1"], "diseases": ["Inflammation", "Pain", "Thrombosis"]}, # ptgs1/2 mapped to inflammation nodes
-            "Metformin": {"targets": ["AMPK1", "SIRT1", "PPARG"], "diseases": ["Type 2 Diabetes", "Obesity"]},
-            "Atorvastatin": {"targets": ["HMGCR", "LDLR"], "diseases": ["Hypercholesterolemia", "Cardiovascular Disease"]},
-            "Lisinopril": {"targets": ["ACE", "NOS3"], "diseases": ["Hypertension", "Heart Failure"]},
-            "Everolimus": {"targets": ["MTOR", "AKT1"], "diseases": ["Renal Cancer", "Breast Cancer"]},
-            "Captopril": {"targets": ["ACE"], "diseases": ["Hypertension"]},
-            "Sorafenib": {"targets": ["BRAF", "KIT", "PDGFRB", "VEGFA"], "diseases": ["Renal Cancer", "Hepatocellular Carcinoma"]},
-            "Infliximab": {"targets": ["TNF"], "diseases": ["Rheumatoid Arthritis", "Crohns Disease"]},
-            "Tocilizumab": {"targets": ["IL6"], "diseases": ["Rheumatoid Arthritis", "COVID-19 Cytokine Storm"]},
-            "Doxorubicin": {"targets": ["TP53", "BRCA1", "MYC"], "diseases": ["Lymphoma", "Breast Cancer", "Sarcoma"]},
-            "Paclitaxel": {"targets": ["AKT1", "MAPK1", "TP53"], "diseases": ["Ovarian Cancer", "Breast Cancer", "Lung Cancer"]},
-            "Valsartan": {"targets": ["AGTR1"], "diseases": ["Hypertension", "Heart Failure"]},
-            "Propranolol": {"targets": ["ADRB1", "ADRB2"], "diseases": ["Hypertension", "Arrhythmia", "Anxiety"]},
-            "Amlodipine": {"targets": ["CACNA1C"], "diseases": ["Hypertension", "Angina"]},
-            "Warfarin": {"targets": ["F2", "F10"], "diseases": ["Thrombosis", "Atrial Fibrillation"]},
-            "Insulin": {"targets": ["INSR", "INS"], "diseases": ["Diabetes mellitus"]},
-            "Pioglitazone": {"targets": ["PPARG", "SREBF1"], "diseases": ["Type 2 Diabetes"]}
-        }
-        
-        # Add random generic drugs to fill the database to 50 drugs
+        drugs_dict = {}
         generic_drug_names = [
             "BioMed-101", "OncoStop-A", "CardioGlow", "MetaboFix", "NeuroZepam",
             "Immunex-Beta", "ArthriCure", "LipidDown", "VasoFlow", "DiabeControl",
@@ -107,7 +85,8 @@ class DataPipeline:
             disease = random.choice(["Oncology", "Autoimmune", "Metabolic Syndrome", "Hypertension"])
             drugs_dict[name] = {
                 "targets": targets,
-                "diseases": [disease]
+                "diseases": [disease],
+                "smiles": self._get_mock_smiles(name)
             }
             
         # Compile everything into a single JSON
@@ -121,7 +100,7 @@ class DataPipeline:
             json.dump(demo_data, f, indent=4)
             
         logger.info(f"Mock dataset generated successfully at {self.demo_data_path}")
-        return demo_data
+
 
     def load_data(self):
         """
@@ -220,6 +199,52 @@ class DataPipeline:
         logger.info(f"Sparsity: {100.0 * (1.0 - np.count_nonzero(sppm) / sppm.size):.2f}% non-zero elements")
         
         return output
+
+    def fetch_smiles_from_pubchem(self, drug_names):
+        """Fetch canonical SMILES from PubChem for a list of drug names."""
+        smiles = {}
+        for name in drug_names:
+            try:
+                url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/property/CanonicalSMILES/JSON"
+                resp = requests.get(url, timeout=5)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    props = data.get("PropertyTable", {}).get("Properties", [])
+                    if props:
+                        smiles[name] = props[0].get("CanonicalSMILES")
+                else:
+                    logger.debug(f"PubChem lookup failed for {name}: {resp.status_code}")
+            except Exception as e:
+                logger.debug(f"Exception fetching SMILES for {name}: {e}")
+        return smiles
+
+    def compute_morgan_fingerprints(self, drugs):
+        """Compute Morgan fingerprint bit vectors (radius 2, 1024 bits) for drugs with SMILES."""
+        try:
+            from rdkit import Chem
+            from rdkit.Chem import AllChem
+        except Exception:
+            logger.warning("RDKit not available, cannot compute Morgan fingerprints.")
+            return {name: [] for name in drugs}
+        fingerprints = {}
+        for name, info in drugs.items():
+            smi = info.get("smiles")
+            if not smi:
+                fingerprints[name] = []
+                continue
+            mol = Chem.MolFromSmiles(smi)
+            if mol is None:
+                fingerprints[name] = []
+                continue
+            fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024)
+            arr = [int(bit) for bit in fp.ToBitString()]
+            fingerprints[name] = arr
+        return fingerprints
+
+    def _get_mock_smiles(self, drug_name):
+        """Placeholder for generic drugs – returns None."""
+        return None
+
 
 if __name__ == "__main__":
     pipeline = DataPipeline()
