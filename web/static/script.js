@@ -227,8 +227,9 @@ function populateTable(data, queryType) {
     const headers = document.getElementById("table-headers");
     // Handle disease query which returns an object with genes and drugs arrays
     if (queryType === "disease") {
-        const genes = data.genes || [];
-        const drugs = data.drugs || [];
+        const resultsObj = data.results || {};
+        const genes = resultsObj.genes || [];
+        const drugs = resultsObj.drugs || [];
         
         badge.textContent = `${genes.length} Genes, ${drugs.length} Drugs Loaded`;
         
@@ -294,7 +295,7 @@ function populateTable(data, queryType) {
         return;
     }
 
-    const results = data;
+    const results = data.results || [];
     badge.textContent = `${results.length} Candidates Loaded`;
     
     // Set headers

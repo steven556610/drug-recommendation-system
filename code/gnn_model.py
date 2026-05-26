@@ -170,26 +170,28 @@ class GNNTrainer:
         # We calculate MSE loss to reconstruct weighted edges (SPPM values + PPI connections)
         criterion = nn.MSELoss()
         
-        # W&B Initialization
+        # MLflow Integration
+        self.active_run = None
         try:
-            import wandb
-            logger.info("Initializing Weights & Biases for GNN training...")
-            wandb.init(
-                project="biorec-repurposing",
-                entity="steven556610-national-yang-ming-university",
-                config={
-                    "model_name": "Weighted-GNN",
-                    "epochs": self.epochs,
-                    "learning_rate": self.lr,
-                    "hidden_dim": self.hidden_dim,
-                    "embedding_dim": self.embedding_dim,
-                    "num_nodes": self.num_nodes,
-                    "num_drugs": self.num_drugs,
-                    "num_genes": self.num_genes
-                }
-            )
+            import mlflow
+            logger.info("Initializing MLflow for GNN training...")
+            tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+            if tracking_uri:
+                mlflow.set_tracking_uri(tracking_uri)
+            mlflow.set_experiment("biorec-repurposing")
+            self.active_run = mlflow.start_run(run_name="GNN_Training")
+            mlflow.log_params({
+                "model_type": "Weighted-GNN",
+                "epochs": self.epochs,
+                "learning_rate": self.lr,
+                "hidden_dim": self.hidden_dim,
+                "embedding_dim": self.embedding_dim,
+                "num_nodes": self.num_nodes,
+                "num_drugs": self.num_drugs,
+                "num_genes": self.num_genes
+            })
         except Exception as e:
-            logger.warning(f"Failed to initialize wandb for GNN: {e}")
+            logger.warning(f"Failed to initialize MLflow for GNN: {e}")
         
         logger.info(f"Model Architecture:\n{model}")
         logger.info(f"Beginning training for {self.epochs} epochs...")
@@ -207,8 +209,9 @@ class GNNTrainer:
             if epoch % 25 == 0 or epoch == 1:
                 logger.info(f"Epoch {epoch:03d}/{self.epochs} | Graph Reconstruction Loss: {loss.item():.5f}")
                 try:
-                    import wandb
-                    wandb.log({"epoch": epoch, "loss": loss.item()})
+                    if self.active_run:
+                        import mlflow
+                        mlflow.log_metric("reconstruction_loss", loss.item(), step=epoch)
                 except Exception:
                     pass
                 
@@ -235,12 +238,14 @@ class GNNTrainer:
         logger.info(f"GNN training complete. Joint representations saved to {self.model_path}")
         logger.info(f"Embeddings shapes - Drugs: {self.drug_embeddings.shape}, Genes: {self.gene_embeddings.shape}")
         
-        # Close W&B run
+        # Close MLflow run
         try:
-            import wandb
-            wandb.finish()
-        except Exception:
-            pass
+            if self.active_run:
+                import mlflow
+                mlflow.log_artifact(self.model_path)
+                mlflow.end_run()
+        except Exception as e:
+            logger.warning(f"Failed to close MLflow run: {e}")
             
         return output
 

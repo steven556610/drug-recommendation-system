@@ -301,31 +301,31 @@ class ModelValidator:
         logger.info(f"--- SVD --- AUROC: {svd_auroc:.4f} | AUPR: {svd_aupr:.4f} | Recall@10: {svd_recalls[10]:.4f}")
         logger.info(f"--- GNN --- AUROC: {gnn_auroc:.4f} | AUPR: {gnn_aupr:.4f} | Recall@10: {gnn_recalls[10]:.4f}")
         
-        # W&B Integration
+        # MLflow Integration
         try:
-            import wandb
-            logger.info("Logging evaluation validation metrics to Weights & Biases...")
-            wandb.init(
-                project="biorec-repurposing",
-                entity="steven556610-national-yang-ming-university",
-                job_type="evaluation",
-                config={
-                    "num_folds": 5
-                }
-            )
-            wandb.log({
-                "svd_auroc": svd_auroc,
-                "svd_aupr": svd_aupr,
-                "svd_recall_10": svd_recalls[10],
-                "svd_recall_50": svd_recalls[50],
-                "gnn_auroc": gnn_auroc,
-                "gnn_aupr": gnn_aupr,
-                "gnn_recall_10": gnn_recalls[10],
-                "gnn_recall_50": gnn_recalls[50]
-            })
-            wandb.finish()
+            import mlflow
+            logger.info("Logging validation metrics to MLflow...")
+            tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+            if tracking_uri:
+                mlflow.set_tracking_uri(tracking_uri)
+            mlflow.set_experiment("biorec-repurposing")
+            with mlflow.start_run(run_name="Model_Validation"):
+                mlflow.log_params({
+                    "num_folds": 5,
+                    "eval_type": "5-fold-cross-validation"
+                })
+                mlflow.log_metrics({
+                    "svd_auroc": float(svd_auroc),
+                    "svd_aupr": float(svd_aupr),
+                    "svd_recall_10": float(svd_recalls[10]),
+                    "svd_recall_50": float(svd_recalls[50]),
+                    "gnn_auroc": float(gnn_auroc),
+                    "gnn_aupr": float(gnn_aupr),
+                    "gnn_recall_10": float(gnn_recalls[10]),
+                    "gnn_recall_50": float(gnn_recalls[50])
+                })
         except Exception as e:
-            logger.warning(f"Failed to log validation results to wandb: {e}")
+            logger.warning(f"Failed to log validation results to MLflow (this is fine if mlflow is offline): {e}")
 
         return metrics
 

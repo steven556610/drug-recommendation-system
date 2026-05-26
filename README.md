@@ -82,6 +82,12 @@ drug_rec_system/
 
 BioRec has been fully refactored into a high-performance modular API system using type-safe Pydantic schemas, built-in CORS configurations, and an Airflow DAG-friendly execution manager. 
 
+### 🌐 Interactive API Documentation (Swagger UI)
+Once the BioRec server is launched, you can access the dynamic, interactive API documentation directly in your browser:
+*   👉 **[http://localhost:8000/docs](http://localhost:8000/docs)**
+
+This built-in Swagger interface allows you to view Pydantic request/response schema specifications, try out endpoints with active queries (e.g. `EGFR` or `Oncology`), and view live JSON returns.
+
 Below are the primary recommendation endpoints you can query:
 
 ### 1. Disease-focused Drug Repurposing

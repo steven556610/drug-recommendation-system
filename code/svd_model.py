@@ -72,23 +72,33 @@ class SVDRecommender:
         logger.info(f"SVD training complete. Embeddings saved to {self.embeddings_path}")
         logger.info(f"Embeddings shapes - Drugs: {self.drug_embeddings.shape}, Genes: {self.gene_embeddings.shape}")
         
-        # W&B Integration
+        # MLflow Integration
         try:
-            import wandb
-            logger.info("Logging SVD training metrics to Weights & Biases...")
-            wandb.init(
-                project="biorec-repurposing",
-                entity="steven556610-national-yang-ming-university",
-                config={
-                    "model_name": "SVD",
+            import mlflow
+            logger.info("Logging SVD training to MLflow...")
+            
+            tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+            if tracking_uri:
+                mlflow.set_tracking_uri(tracking_uri)
+                
+            mlflow.set_experiment("biorec-repurposing")
+            with mlflow.start_run(run_name="SVD_Training"):
+                mlflow.log_params({
+                    "model_type": "SVD",
                     "embedding_dim": self.embedding_dim,
-                    "matrix_shape": sppm.shape
-                }
-            )
-            wandb.log({"singular_values": [float(s) for s in Sigma]})
-            wandb.finish()
+                    "drugs_count": len(self.drugs),
+                    "genes_count": len(self.genes),
+                    "matrix_rows": sppm.shape[0],
+                    "matrix_cols": sppm.shape[1]
+                })
+                mlflow.log_metrics({
+                    "singular_value_mean": float(np.mean(Sigma)),
+                    "singular_value_max": float(np.max(Sigma)),
+                    "singular_value_min": float(np.min(Sigma))
+                })
+                mlflow.log_artifact(self.embeddings_path)
         except Exception as e:
-            logger.warning(f"Failed to log SVD training to wandb (this is fine if wandb is offline): {e}")
+            logger.warning(f"Failed to log SVD training to MLflow (this is fine if mlflow is offline): {e}")
 
         return output
 
