@@ -200,6 +200,26 @@ Visit `http://localhost:8000` to interact with:
 *   **Query Tab**: Search Diseases, Drugs, or Genes to get top candidates and live local network graphs.
 *   **Validation Tab**: Interactive AUROC/AUPR ROC curves (via Chart.js).
 
+### 5. Running with Docker & Docker Compose
+For a fully sandboxed, containerized runtime environment, you can manage the application instantly via Docker:
+*   **Build the Docker image**:
+    ```bash
+    docker compose build
+    ```
+*   **Run the container in background**:
+    ```bash
+    docker compose up -d
+    ```
+*   **Follow container runtime logs**:
+    ```bash
+    docker compose logs -f
+    ```
+*   **Shut down the container**:
+    ```bash
+    docker compose down
+    ```
+*(Note: Host volumes are automatically mapped for `./data/processed`, `./models`, and `./mlruns` inside `docker-compose.yml` to guarantee all SQLite files, model checkpoint weights, and MLflow evaluation charts are fully persistent on your host machine across builds.)*
+
 ---
 
 ## 📊 Evaluation & Validation Metrics

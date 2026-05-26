@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+.github
+
+# Environment configs
+.env
+
+# Python Caches & Environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# IDE Settings
+.idea/
+.vscode
+
+# Project Data and Metrics (Mounted via volumes instead)
+mlruns/
+data/raw/
+data/*.tsv.gz
+data/*.crdownload
+data/processed/*.db
+data/processed/*.pkl
+data/processed/sppm.pkl
+
+# Logs
+*.log

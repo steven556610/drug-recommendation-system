@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  biorec-web:
+    build: .
+    image: biorec-system:latest
+    container_name: biorec-container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/processed:/app/data/processed
+      - ./models:/app/models
+      - ./mlruns:/app/mlruns
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - PORT=8000
+    restart: unless-stopped
