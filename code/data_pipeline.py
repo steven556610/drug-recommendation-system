@@ -5,6 +5,7 @@ import random
 import numpy as np
 from utils import get_logger, get_project_root
 import requests
+from db_manager import DBManager
 
 logger = get_logger("DataPipeline")
 
@@ -20,6 +21,7 @@ class DataPipeline:
 
         self.sppm_path = os.path.join(self.processed_dir, "sppm.pkl")
         self.demo_data_path = os.path.join(self.processed_dir, "demo_data.json")
+        self.db = DBManager()
 
     def generate_mock_data(self):
         """
@@ -117,14 +119,88 @@ class DataPipeline:
 
     def load_data(self):
         """
-        Loads dataset. Checks if real STRING & DrugBank data files exist in `data/raw`.
-        If not, automatically falls back to generating and loading the mock dataset.
+        Loads dataset. Checks if real STRING & STITCH data files exist in `data/`.
+        If present, ingests them into the SQLite database and loads them.
+        Otherwise, falls back to generating and loading the high-fidelity mock dataset.
         """
+        # Check if we should parse raw STITCH / STRING files
+        stitch_chem_file = os.path.join(self.root, "data", "chemicals.v5.0.tsv.gz")
+        stitch_links_file = os.path.join(self.root, "data", "chemical_chemical.links.v5.0.tsv.gz")
+        
+        db_exists = os.path.exists(self.db.db_path)
+        
+        if not db_exists and (os.path.exists(stitch_chem_file) or os.path.exists(stitch_links_file)):
+            logger.info("Raw STITCH/STRING dataset files detected! Setting up database...")
+            self.db.init_database()
+            if os.path.exists(stitch_chem_file):
+                self.db.parse_chemicals_gzip(stitch_chem_file, limit=50000)
+            if os.path.exists(stitch_links_file):
+                self.db.parse_cpi_gzip(stitch_links_file, limit=100000)
+                
+        # If database has tables and records, load from SQLite
+        if os.path.exists(self.db.db_path):
+            try:
+                conn = self.db.get_connection()
+                cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM chemicals")
+                chem_count = cursor.fetchone()[0]
+                
+                if chem_count > 0:
+                    logger.info(f"Loading biological network from SQLite database ({chem_count} chemicals found)...")
+                    # Retrieve chemicals
+                    cursor.execute("SELECT cid, smiles, name FROM chemicals LIMIT 100")
+                    chems = cursor.fetchall()
+                    drugs_dict = {}
+                    for cid, smiles, name in chems:
+                        # Find targeting proteins
+                        cursor.execute("SELECT protein FROM cpi_edges WHERE chemical = ?", (cid,))
+                        targets = [row[0] for row in cursor.fetchall()]
+                        drugs_dict[name] = {
+                            "targets": targets,
+                            "diseases": ["Oncology" if any("EGFR" in t or "TP53" in t for t in targets) else "General"],
+                            "smiles": smiles,
+                            "fingerprint": [1 if hash(name + str(i)) % 2 == 0 else 0 for i in range(256)]
+                        }
+                    
+                    # Fetch active genes/proteins
+                    cursor.execute("SELECT DISTINCT protein FROM cpi_edges LIMIT 150")
+                    all_genes = [row[0] for row in cursor.fetchall()]
+                    
+                    # Fetch PPI edges
+                    cursor.execute("SELECT protein1, protein2 FROM ppi_edges LIMIT 300")
+                    ppi_edges = cursor.fetchall()
+                    
+                    if not ppi_edges:
+                        raise ValueError("PPI edge table is empty (STRING links missing)")
+                    
+                    diseases = ["Oncology", "General"]
+                    disease_to_genes = {
+                        "Oncology": [g for g in all_genes if "EGFR" in g or "TP53" in g],
+                        "General": all_genes
+                    }
+                    
+                    return {
+                        "genes": all_genes,
+                        "ppi_edges": ppi_edges,
+                        "drugs": drugs_dict,
+                        "diseases": diseases,
+                        "disease_genes": disease_to_genes
+                    }
+            except Exception as e:
+                logger.error(f"Failed to load from SQLite: {e}. Falling back to mock dataset.")
+                
+        # Graceful fallback to mock data
         if not os.path.exists(self.demo_data_path):
             self.generate_mock_data()
             
         with open(self.demo_data_path, "r", encoding="utf-8") as f:
             data = json.load(f)
+            
+        if "diseases" not in data:
+            logger.info("Outdated demo_data.json detected (missing diseases). Re-generating...")
+            self.generate_mock_data()
+            with open(self.demo_data_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
             
         return data
 

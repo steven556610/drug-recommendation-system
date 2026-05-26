@@ -40,6 +40,13 @@ data/processed/*
 !data/processed/.gitkeep
 !data/processed/demo_data.json
 
+# Ignore giant raw STITCH/STRING dataset files and Chrome download leftovers
+data/*.tsv.gz
+data/*.tsv
+data/*.csv
+data/*.db
+*.crdownload
+
 models/*.pkl
 models/*.pt
 models/*.json

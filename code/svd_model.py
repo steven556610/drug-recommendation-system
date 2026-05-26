@@ -72,6 +72,24 @@ class SVDRecommender:
         logger.info(f"SVD training complete. Embeddings saved to {self.embeddings_path}")
         logger.info(f"Embeddings shapes - Drugs: {self.drug_embeddings.shape}, Genes: {self.gene_embeddings.shape}")
         
+        # W&B Integration
+        try:
+            import wandb
+            logger.info("Logging SVD training metrics to Weights & Biases...")
+            wandb.init(
+                project="biorec-repurposing",
+                entity="steven556610-national-yang-ming-university",
+                config={
+                    "model_name": "SVD",
+                    "embedding_dim": self.embedding_dim,
+                    "matrix_shape": sppm.shape
+                }
+            )
+            wandb.log({"singular_values": [float(s) for s in Sigma]})
+            wandb.finish()
+        except Exception as e:
+            logger.warning(f"Failed to log SVD training to wandb (this is fine if wandb is offline): {e}")
+
         return output
 
     def load_embeddings(self):

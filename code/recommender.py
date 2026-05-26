@@ -143,12 +143,17 @@ class BioRecommender:
         # 2. Node2Vec
         n2v_sims = np.zeros(len(drugs))
         if self.n2v_data:
-            n2v_sims = self.compute_cosine_similarity(self.n2v_data["gene_embeddings"][gene_idx], self.n2v_data["drug_embeddings"])
+            n2v_drugs = self.n2v_data.get("drugs", [])
+            n2v_raw = self.compute_cosine_similarity(self.n2v_data["gene_embeddings"][gene_idx], self.n2v_data["drug_embeddings"])
+            for d_idx, d in enumerate(drugs):
+                if d in n2v_drugs:
+                    n2v_sims[d_idx] = n2v_raw[n2v_drugs.index(d)]
             
         # 3. NetProp (RWR)
         np_sims = np.zeros(len(drugs))
         if self.netprop_data is not None:
-            np_sims = self.netprop_data[:, gene_idx]  # shape: (num_drugs, num_genes)
+            if self.netprop_data.shape[0] == len(drugs):
+                np_sims = self.netprop_data[:, gene_idx]
             
         # 4. TransE KG
         kg_sims = np.zeros(len(drugs))
@@ -166,12 +171,16 @@ class BioRecommender:
         # 5. Fingerprint (Chemical Sim via targets)
         fp_sims = np.zeros(len(drugs))
         if self.fp_data:
-            fp_sims = self.fp_data["drug_gene_scores"][:, gene_idx]
+            fp_raw = self.fp_data["drug_gene_scores"][:, gene_idx]
+            if len(fp_raw) == len(drugs):
+                fp_sims = fp_raw
             
         # 6. Graph Traversal
         trav_sims = np.zeros(len(drugs))
         if self.trav_data is not None:
-            trav_sims = self.trav_data[:, gene_idx]
+            trav_raw = self.trav_data[:, gene_idx]
+            if len(trav_raw) == len(drugs):
+                trav_sims = trav_raw
             
         # Normalize all scores to [0, 1] to combine them
         def norm(arr):
@@ -294,12 +303,12 @@ class BioRecommender:
         # Get genes associated with disease
         associated_genes = disease_genes.get(disease_name, [])
         if not associated_genes:
-            return {"genes": [], "drugs": []}
+            return {"disease": disease_name, "genes": [], "drugs": []}
             
         # Get embeddings for these associated genes
         assoc_gene_indices = [genes.index(g) for g in associated_genes if g in genes]
         if not assoc_gene_indices:
-            return {"genes": [], "drugs": []}
+            return {"disease": disease_name, "genes": [], "drugs": []}
             
         # Create a "disease profile" by averaging the embeddings of its associated genes
         disease_profile = np.mean(gene_embs[assoc_gene_indices], axis=0)

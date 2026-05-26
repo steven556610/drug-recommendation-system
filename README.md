@@ -57,9 +57,14 @@ To generate the final candidate list, the predictions from all 7 models (SVD, GN
 drug_rec_system/
 ├── data/                    # Raw biological datasets & processed matrices
 │   ├── raw/                 # STRING and DrugBank source files
-│   └── processed/           # Processed matrices (SPPM) and light demo JSONs
+│   └── processed/           # SQLite database (biorec.db), SPPM, and demo JSONs
 ├── models/                  # Trained embedding weights & evaluation outputs
 ├── code/                    # Core Python source pipelines
+│   ├── api.py               # [NEW] Modular FastAPI Endpoint Router
+│   ├── api_pydantic.py      # [NEW] Type-safe Pydantic Schema Serialization
+│   ├── api_cors.py          # [NEW] Secure CORS Middleware Policies
+│   ├── api_airflow.py       # [NEW] Airflow DAG background execution webhook
+│   ├── db_manager.py        # [NEW] SQLite stream parser & query manager
 │   ├── data_pipeline.py     # BFS/Dijkstra network proximity constructor
 │   ├── svd_model.py         # SVD matrix factorization engine
 │   ├── gnn_model.py         # PyTorch-native custom weighted GNN
@@ -73,6 +78,91 @@ drug_rec_system/
 
 ---
 
+## 🔌 API Reference & Usage Guide
+
+BioRec has been fully refactored into a high-performance modular API system using type-safe Pydantic schemas, built-in CORS configurations, and an Airflow DAG-friendly execution manager. 
+
+Below are the primary recommendation endpoints you can query:
+
+### 1. Disease-focused Drug Repurposing
+Allows you to input a **Disease Name** and retrieves both the known/predicted disease marker genes and the top candidate drugs for repurposing.
+
+*   **Endpoint**: `GET /api/recommend/disease`
+*   **Query Parameters**:
+    *   `name` (string, required): The name of the disease (e.g. `Oncology`, `Autoimmune`, `Metabolic Syndrome`, `Hypertension`).
+    *   `method` (string, optional): Computational backbone - `gnn` (default) or `svd`.
+*   **Example Request**:
+    ```bash
+    curl -X GET "http://localhost:8000/api/recommend/disease?name=Oncology&method=gnn"
+    ```
+*   **Example Response**:
+    ```json
+    {
+      "query": "Oncology",
+      "method": "GNN",
+      "results": {
+        "disease": "Oncology",
+        "genes": [
+          { "gene": "EGFR", "score": 0.9412, "type": "Known Marker" },
+          { "gene": "TP53", "score": 0.8874, "type": "Known Marker" },
+          { "gene": "BRCA1", "score": 0.7423, "type": "Predicted Marker" }
+        ],
+        "drugs": [
+          { "rank": 1, "drug": "OncoStop-A", "score": 0.9251, "type": "Approved Indication", "indications": "Oncology" },
+          { "rank": 2, "drug": "BioMed-101", "score": 0.8142, "type": "Repurposed Candidate", "indications": "General" }
+        ]
+      }
+    }
+    ```
+
+### 2. Drug-centric Similarity Finder
+Allows you to input a **Drug Name** and returns a list of topologically and structurally similar candidate drugs.
+
+*   **Endpoint**: `GET /api/recommend/drug`
+*   **Query Parameters**:
+    *   `name` (string, required): The name of the queried drug (e.g. `OncoStop-A`, `CardioGlow`, `MetaboFix`).
+    *   `method` (string, optional): Computational backbone - `gnn` (default) or `svd`.
+*   **Example Request**:
+    ```bash
+    curl -X GET "http://localhost:8000/api/recommend/drug?name=OncoStop-A&method=gnn"
+    ```
+*   **Example Response**:
+    ```json
+    {
+      "query": "OncoStop-A",
+      "method": "GNN",
+      "results": [
+        { "rank": 1, "drug": "BioMed-101", "score": 0.8654, "indications": "General" },
+        { "rank": 2, "drug": "KinaseOff", "score": 0.7512, "indications": "Oncology" }
+      ]
+    }
+    ```
+
+### 3. Target Gene Drug Finder
+Allows you to input a **Protein/Gene Name** and returns the most potent candidate drug molecules that target it directly or act via high network proximity.
+
+*   **Endpoint**: `GET /api/recommend/gene`
+*   **Query Parameters**:
+    *   `name` (string, required): The name of the target gene (e.g. `EGFR`, `TP53`, `TNF`).
+    *   `method` (string, optional): `gnn` or `svd`.
+*   **Example Request**:
+    ```bash
+    curl -X GET "http://localhost:8000/api/recommend/gene?name=TP53&method=gnn"
+    ```
+
+### 4. Consensus Multi-Method Recommendation (7 Algorithms)
+Calculates a robust normalized consensus score across all 7 integrated algorithms (SVD, GNN, Node2Vec, NetProp, TransE, Fingerprint, Traversal).
+
+*   **Endpoint**: `GET /api/recommend/multi`
+*   **Query Parameters**:
+    *   `name` (string, required): The target gene name.
+*   **Example Request**:
+    ```bash
+    curl -X GET "http://localhost:8000/api/recommend/multi?name=EGFR"
+    ```
+
+---
+
 ## ⚡ Quick Start
 
 ### 1. Installation
@@ -83,14 +173,14 @@ cd BioRec/drug_rec_system
 pip install -r requirements.txt
 ```
 
-### 2. Prepare Data & Compute SPPM
-Generate the high-fidelity mock graph (or download real datasets) and compute the shortest path proximity matrix:
+### 2. Prepare Data & Ingest STITCH/STRING Datasets
+Generate the high-fidelity mock graph, or place raw STITCH files (`chemicals.v5.0.tsv.gz` and `chemical_chemical.links.v5.0.tsv.gz`) in the `data/` folder and BioRec will automatically stream-parse and index them into the local SQLite database:
 ```bash
 python run.py --mode pipeline
 ```
 
 ### 3. Model Training & 5-Fold Cross Validation
-Train the SVD and GNN models, running the rigorous evaluation suite (AUROC, AUPR, Recall@K):
+Train the embedding models and run the validation framework:
 ```bash
 python run.py --mode train
 ```
@@ -101,8 +191,8 @@ Start the FastAPI server and open the web dashboard:
 python run.py --mode web
 ```
 Visit `http://localhost:8000` to interact with:
-*   **Query Tab**: Search Genes or Drugs to get top vector-distance candidates with custom local network visualizations.
-*   **Validation Tab**: Side-by-side AUROC/AUPR metric panels and live interactive ROC/PR curves (via Chart.js).
+*   **Query Tab**: Search Diseases, Drugs, or Genes to get top candidates and live local network graphs.
+*   **Validation Tab**: Interactive AUROC/AUPR ROC curves (via Chart.js).
 
 ---
 

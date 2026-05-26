@@ -301,6 +301,32 @@ class ModelValidator:
         logger.info(f"--- SVD --- AUROC: {svd_auroc:.4f} | AUPR: {svd_aupr:.4f} | Recall@10: {svd_recalls[10]:.4f}")
         logger.info(f"--- GNN --- AUROC: {gnn_auroc:.4f} | AUPR: {gnn_aupr:.4f} | Recall@10: {gnn_recalls[10]:.4f}")
         
+        # W&B Integration
+        try:
+            import wandb
+            logger.info("Logging evaluation validation metrics to Weights & Biases...")
+            wandb.init(
+                project="biorec-repurposing",
+                entity="steven556610-national-yang-ming-university",
+                job_type="evaluation",
+                config={
+                    "num_folds": 5
+                }
+            )
+            wandb.log({
+                "svd_auroc": svd_auroc,
+                "svd_aupr": svd_aupr,
+                "svd_recall_10": svd_recalls[10],
+                "svd_recall_50": svd_recalls[50],
+                "gnn_auroc": gnn_auroc,
+                "gnn_aupr": gnn_aupr,
+                "gnn_recall_10": gnn_recalls[10],
+                "gnn_recall_50": gnn_recalls[50]
+            })
+            wandb.finish()
+        except Exception as e:
+            logger.warning(f"Failed to log validation results to wandb: {e}")
+
         return metrics
 
 if __name__ == "__main__":
